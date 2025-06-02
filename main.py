@@ -17,8 +17,8 @@ mixer.init()
 mixer.music.load("jungles.ogg")
 mixer.music.play()
 
-money = mixer.Sound("money.ogg")
-kick = mixer.Sound("kick.ogg")
+money_sound = mixer.Sound("money.ogg")
+kick_sound = mixer.Sound("kick.ogg")
 
 
 class GameSprite(sprite.Sprite):
@@ -65,8 +65,8 @@ class Enemy(GameSprite):
 class Wall(sprite.Sprite):
     def __init__(self, wall_x, wall_y, color):
         super().__init__()
-        self.image = Surface((200, 10))
-        self.image.fill((0,0,255))
+        self.image = Surface((20, 400))
+        self.image.fill((0, 255, 247))
         self.rect = self.image.get_rect()
         self.rect.x = wall_x
         self.rect.y = wall_y
@@ -74,39 +74,67 @@ class Wall(sprite.Sprite):
     def draw_wall(self):
         window.blit(self.image, (self.rect.x, self.rect.y))
 
-player = Player("hero.png", 100, 100, 5)      
-enemy = Enemy("cyborg.png", 300, 100, 2)      
-money = GameSprite("treasure.png", 500, 100, 0)
-wall1 = Wall(500, 70, (0, 0, 255))
-wall2 = Wall(200, 90, (0, 0, 255))
-wall3 = Wall(600, 40, (0, 0, 255))
-wall4 = Wall(800, 50, (0, 0, 255))
-wall5 = Wall(210, 40, (0, 0, 255))
+player = Player("hero.png", 75, 0, 5)      
+enemy = Enemy("cyborg.png", 600, 300, 2)      
+money = GameSprite("treasure.png", 550, 400, 0)
+wall1 = Wall(50, 70, (0, 0, 255))
+wall2 = Wall(150, 0, (0, 0, 255))
+wall3 = Wall(250, 70, (0, 0, 255))
+wall4 = Wall(350, 0, (0, 0, 255))
+wall5 = Wall(450, 70, (0, 0, 255))
 
 walls = [wall1, wall2, wall3, wall4, wall5]
 
 font.init()
 font = font.Font(None, 70)
-win = font.render("YOU WIN", True, (255,215, 0))
-lose = font.render("YOU LOSE", False, (255,215, 0))
+win = font.render("YOU WIN", True, (255, 0, 0 ))
+lose = font.render("YOU LOSE", False, (255,0, 0))
 
 while game:
     for e in event.get():
         if e.type == QUIT:
             game = False
-    window.blit(background, (0, 0))
-    for wall in walls:
-        wall.draw_wall()
-    if finish != True:
-       if sprite.collide_rect(player, money):
-           window.blit(background, (200, 200))
-           finish = True
-           money.play()
-    clock.tick(FPS)
+    if not finish:
+        window.blit(background, (0, 0))
 
-    player.update()   
-    enemy.update()    
-    enemy.reset()
-    money.reset()
-    
+        for wall in walls:
+            wall.draw_wall()
+
+        player.update()
+        enemy.update()
+        enemy.reset()
+        money.reset()
+
+        
+        if sprite.collide_rect(player, money):
+            finish = True
+            window.blit(win, (200, 200))
+            money_sound.play()
+
+       
+        if sprite.collide_rect(player, enemy):
+            finish = True
+            window.blit(lose, (200, 200))
+            kick_sound.play()
+
+        for wall in walls:
+            if sprite.collide_rect(player, wall):
+                finish = True
+                window.blit(lose, (200, 200))
+                kick_sound.play()
+                break  
+    else:
+       
+        window.blit(background, (0, 0))
+        for wall in walls:
+            wall.draw_wall()
+        player.reset()
+        enemy.reset()
+        money.reset()
+        if sprite.collide_rect(player, money):
+            window.blit(win, (200, 200))
+        else:
+            window.blit(lose, (200, 200))
+
     display.update()
+    clock.tick(FPS)
